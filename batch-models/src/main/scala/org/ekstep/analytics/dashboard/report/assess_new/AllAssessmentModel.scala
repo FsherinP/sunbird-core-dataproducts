@@ -55,7 +55,7 @@ object AllAssessmentModel extends IBatchModelTemplate[String, DummyInput, DummyO
 
     // get course details, with rating info
     val (hierarchyDF, allCourseProgramDetailsWithCompDF, allCourseProgramDetailsDF,
-      allCourseProgramDetailsWithRatingDF) = contentDataFrames(orgDF, Seq("Course", "Program", "Blended Program", "Standalone Assessment"), runValidation = false)
+      allCourseProgramDetailsWithRatingDF) = contentDataFrames(orgDF, Seq("Course", "Program", "Blended Program", "Standalone Assessment","Curated Program"), runValidation = false)
 
     var assessmentDF = allAssessmentESDataFrame(true)
 

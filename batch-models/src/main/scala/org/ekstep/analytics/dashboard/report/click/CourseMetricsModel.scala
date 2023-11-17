@@ -52,7 +52,7 @@ object CourseMetricsModel extends IBatchModelTemplate[String, DummyInput, DummyO
 
     // get course details, attach rating info, dispatch to kafka to be ingested by druid data-source: dashboards-courses
     val (hierarchyDF, allCourseProgramDetailsWithCompDF, allCourseProgramDetailsDF,
-      allCourseProgramDetailsWithRatingDF) = contentDataFrames(orgDF, Seq("Course", "Program", "CuratedCollections"))
+      allCourseProgramDetailsWithRatingDF) = contentDataFrames(orgDF, Seq("Course", "Program", "CuratedCollections","Curated Program"))
 
     val readLoc = "/home/analytics/click-stream-data/"
     val loc = "/home/analytics/click-stream-data/gen/"
