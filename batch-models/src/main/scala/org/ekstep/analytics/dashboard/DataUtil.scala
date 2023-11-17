@@ -188,6 +188,11 @@ object DataUtil extends Serializable {
       StructField("userID", StringType, nullable = true),
       StructField("userActualTimeSpentLearning", FloatType, nullable = true)
     ))
+    val usersPlatformEngagementSchema: StructType = StructType(Seq(
+      StructField("userid", StringType, nullable = true),
+      StructField("platformEngagementTime", FloatType, nullable = true),
+      StructField("sessionCount", IntegerType, nullable = true)
+    ))
     val npsUserIds: StructType = StructType(Seq(
       StructField("userid", StringType, nullable = true)
     ))
@@ -1506,6 +1511,10 @@ object DataUtil extends Serializable {
     df
   }
 
+  def learnerStatsDataFrame()(implicit spark: SparkSession, sc: SparkContext, fc: FrameworkContext, conf: DashboardConfig): DataFrame = {
+    cassandraTableAsDataFrame(conf.cassandraUserKeyspace, conf.cassandraLearnerStatsTable)
+  }
+
   /* telemetry data frames */
 
   def loggedInMobileUserDataFrame()(implicit spark: SparkSession, conf: DashboardConfig): DataFrame = {
@@ -1534,6 +1543,15 @@ object DataUtil extends Serializable {
     if (df == null) return emptySchemaDataFrame(Schema.userActualTimeSpentLearningSchema)
 
     show(df, "actualTimeSpentLearningDataFrame")
+    df
+  }
+
+  def usersPlatformEngagementDataframe(weekStart: String)(implicit spark: SparkSession, conf: DashboardConfig): DataFrame = {
+    val query = s"""SELECT uid AS userid, SUM(total_time_spent) / 60.0 AS platformEngagementTime, COUNT(*) AS sessionCount FROM \"summary-events\" WHERE dimensions_type='app' AND __time >= TIMESTAMP '${weekStart}' GROUP BY 1""".stripMargin
+    val df = druidDFOption(query, conf.sparkDruidRouterHost, limit = 1000000).orNull
+
+    if (df == null) return emptySchemaDataFrame(Schema.usersPlatformEngagementSchema)
+    show(df, "usersPlatformEngagementDataframe")
     df
   }
 
