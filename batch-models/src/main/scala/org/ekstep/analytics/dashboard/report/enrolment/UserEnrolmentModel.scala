@@ -92,6 +92,7 @@ object UserEnrolmentModel extends IBatchModelTemplate[String, DummyInput, DummyO
       .withColumn("Certificate_Generated", expr("CASE WHEN issuedCertificateCount > 0 THEN 'Yes' ELSE 'No' END"))
       .withColumn("ArchivedOn", expr("CASE WHEN courseStatus == 'Retired' THEN lastStatusChangedOn ELSE '' END"))
       .withColumn("ArchivedOn", to_date(col("ArchivedOn"), "dd/MM/yyyy"))
+      .withColumn("Certificate_ID", col("certificateID"))
 
     df = df.distinct().dropDuplicates("userID", "courseID")
 
@@ -135,7 +136,7 @@ object UserEnrolmentModel extends IBatchModelTemplate[String, DummyInput, DummyO
       col("courseResourceCount").alias("resourceCount"),
       col("courseProgress").alias("resourcesConsumed"),
       round(expr("CASE WHEN courseResourceCount=0 THEN 0.0 ELSE 100.0 * courseProgress / courseResourceCount END"), 2).alias("rawCompletionPercentage"),
-      col("certificateID").alias("Certificate_ID"),
+      col("Certificate_ID"),
       col("Report_Last_Generated_On")
     )
       .coalesce(1)
@@ -163,6 +164,7 @@ object UserEnrolmentModel extends IBatchModelTemplate[String, DummyInput, DummyO
         col("courseProgress").alias("resource_count_consumed"),
         col("enrolledOn").alias("enrolled_on"),
         col("userCourseCompletionStatus").alias("user_consumption_status"),
+        col("Certificate_ID").alias("certificate_id"),
         col("data_last_generated_on")
       )
     generateWarehouseReport(warehouseDF.coalesce(1), reportPath, conf.localReportDir)
