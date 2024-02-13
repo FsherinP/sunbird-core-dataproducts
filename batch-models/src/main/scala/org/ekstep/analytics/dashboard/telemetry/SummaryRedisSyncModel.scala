@@ -112,8 +112,8 @@ object SummaryRedisSyncModel extends IBatchModelTemplate[String, DummyInput, Dum
     // Users active
     // SELECT dimension_channel, COUNT(DISTINCT(uid)) as active_count FROM \"summary-events\"
     // WHERE dimensions_type='app' AND __time > CURRENT_TIMESTAMP - INTERVAL '12' MONTH GROUP BY 1
-    val activeUsersLast12MonthsDF = activeUsersLast12MonthsDataFrame()
-    Redis.dispatchDataFrame[Long]("dashboard_active_users_last_12_months_by_org", activeUsersLast12MonthsDF, "orgID", "activeCount")
+    //val activeUsersLast12MonthsDF = activeUsersLast12MonthsDataFrame()
+    //Redis.dispatchDataFrame[Long]("dashboard_active_users_last_12_months_by_org", activeUsersLast12MonthsDF, "orgID", "activeCount")
 
     // Daily time spent by users
     // SELECT dimension_channel AS orgID, SUM(total_time_spent)/(30 * 3600.0) as timeSpent FROM \"summary-events\"
@@ -132,16 +132,16 @@ object SummaryRedisSyncModel extends IBatchModelTemplate[String, DummyInput, Dum
 
   }
 
-  def activeUsersLast12MonthsDataFrame()(implicit spark: SparkSession, conf: DashboardConfig) : DataFrame = {
-    val query = """SELECT dimension_channel AS orgID, COUNT(DISTINCT(uid)) as activeCount FROM \"summary-events\" WHERE dimensions_type='app' AND __time > CURRENT_TIMESTAMP - INTERVAL '12' MONTH GROUP BY 1"""
-    var df = druidDFOption(query, conf.sparkDruidRouterHost).orNull
-    if (df == null) return emptySchemaDataFrame(Schema.activeUsersSchema)
-
-    df = df.withColumn("activeCount", expr("CAST(activeCount as LONG)"))  // Important to cast as long otherwise a cast will fail later on
-
-    show(df)
-    df
-  }
+//  def activeUsersLast12MonthsDataFrame()(implicit spark: SparkSession, conf: DashboardConfig) : DataFrame = {
+//    val query = """SELECT dimension_channel AS orgID, COUNT(DISTINCT(uid)) as activeCount FROM \"summary-events\" WHERE dimensions_type='app' AND __time > CURRENT_TIMESTAMP - INTERVAL '12' MONTH GROUP BY 1"""
+//    var df = druidDFOption(query, conf.sparkDruidRouterHost).orNull
+//    if (df == null) return emptySchemaDataFrame(Schema.activeUsersSchema)
+//
+//    df = df.withColumn("activeCount", expr("CAST(activeCount as LONG)"))  // Important to cast as long otherwise a cast will fail later on
+//
+//    show(df)
+//    df
+//  }
 
   def dailyTimeSpentLast30DaysDataFrame()(implicit spark: SparkSession, conf: DashboardConfig) : DataFrame = {
     val query = """SELECT dimension_channel AS orgID, SUM(total_time_spent)/(30 * 3600.0) as timeSpent FROM \"summary-events\" WHERE dimensions_type='app' AND __time >= CURRENT_TIMESTAMP - INTERVAL '30' DAY GROUP BY 1"""
