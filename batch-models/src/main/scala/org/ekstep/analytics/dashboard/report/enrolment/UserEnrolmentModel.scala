@@ -135,6 +135,7 @@ object UserEnrolmentModel extends IBatchModelTemplate[String, DummyInput, DummyO
       col("courseResourceCount").alias("resourceCount"),
       col("courseProgress").alias("resourcesConsumed"),
       round(expr("CASE WHEN courseResourceCount=0 THEN 0.0 ELSE 100.0 * courseProgress / courseResourceCount END"), 2).alias("rawCompletionPercentage"),
+      col("certificateID").alias("Certificate_ID"),
       col("Report_Last_Generated_On")
     )
       .coalesce(1)

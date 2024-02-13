@@ -1020,7 +1020,7 @@ object DataUtil extends Serializable {
   def userCourseProgramCompletionDataFrame(extraCols: Seq[String] = Seq(), datesAsLong: Boolean = false)(implicit spark: SparkSession, conf: DashboardConfig): DataFrame = {
 
     val selectCols = Seq("userID", "courseID", "batchID", "courseProgress", "dbCompletionStatus", "courseCompletedTimestamp",
-      "courseEnrolledTimestamp", "lastContentAccessTimestamp", "issuedCertificateCount", "certificateGeneratedOn") ++ extraCols
+      "courseEnrolledTimestamp", "lastContentAccessTimestamp", "issuedCertificateCount", "certificateGeneratedOn", "certificateID") ++ extraCols
 
     var df = cassandraTableAsDataFrame(conf.cassandraCourseKeyspace, conf.cassandraUserEnrolmentsTable)
       .where(expr("active=true"))
@@ -1029,6 +1029,7 @@ object DataUtil extends Serializable {
       .withColumn("lastContentAccessTimestamp", col("lastcontentaccesstime"))
       .withColumn("issuedCertificateCount", size(col("issued_certificates")))
       .withColumn("certificateGeneratedOn", when(col("issued_certificates").isNull, "").otherwise( col("issued_certificates")(0).getItem("lastIssuedOn")))
+      .withColumn("certificateID", when(col("issued_certificates").isNull, "").otherwise( col("issued_certificates")(0).getItem("identifier")))
       .withColumnRenamed("userid", "userID")
       .withColumnRenamed("courseid", "courseID")
       .withColumnRenamed("batchid", "batchID")
